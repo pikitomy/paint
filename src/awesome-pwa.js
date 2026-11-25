@@ -7,8 +7,8 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
   const label=document.createElement('div'), bar=document.createElement('progress'), close=document.createElement('button');
   bar.style.cssText='width:100%;margin:8px 0';close.textContent='Cerrar';close.hidden=true;close.onclick=()=>box.remove();
   box.append(label,bar,close);document.body.append(box);label.textContent='Preparando Awesome Paint sin conexión…';
-  let reg;
-  function update(e){const d=e.data||{};if(d.type==='AP_PROGRESS'){bar.max=d.total;bar.value=d.done;label.textContent=`Descargando recursos: ${d.done} de ${d.total} (${Math.floor(d.done/d.total*100)}%). No cierres la aplicación.`;}
+  let reg, started=Date.now(), initial=null;
+  function update(e){const d=e.data||{};if(d.type==='AP_PROGRESS'){if(initial===null){initial=d.done;started=Date.now();} const rate=(d.done-initial)/Math.max(1,(Date.now()-started)/1000); const eta=rate>0?` · ${rate.toFixed(1)} archivos/s · aprox. ${Math.ceil((d.total-d.done)/rate/60)} min restantes`:'';bar.max=d.total;bar.value=d.done;label.textContent=`Descargando recursos: ${d.done} de ${d.total} (${Math.floor(d.done/d.total*100)}%). No cierres la aplicación.${eta}`;}
    if(d.type==='AP_READY'){bar.max=1;bar.value=1;label.textContent='Todos los recursos descargados. Disponible sin conexión cuando se active esta versión.';close.hidden=false;}
    if(d.type==='AP_ERROR'){label.textContent='No se completó la descarga. Recargá con Internet para reintentar. '+d.message;close.hidden=false;}}
   navigator.serviceWorker.addEventListener('message',update);
