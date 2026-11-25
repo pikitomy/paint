@@ -1,0 +1,83 @@
+/* Appearance panel and optional overrides for the original themes. */
+.ap-dialog { width:min(390px,90vw); max-height:85vh; overflow:auto; padding:20px; background:#f5f5f5; color:#222; border:1px solid #777; border-radius:6px; font:14px Arial,sans-serif; }
+.ap-dialog::backdrop {background:#0005;}
+.ap-dialog h2 {font-size:18px;margin:0 0 16px;}
+.ap-dialog label {display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;}
+.ap-dialog fieldset {padding:8px 12px;border:1px solid #aaa;min-width:0;}
+.ap-dialog input[type=color] {width:45px;height:30px;}
+.ap-dialog input[type=number] {width:60px;}
+.ap-actions {display:flex;justify-content:space-between;margin-top:16px;gap:8px;}
+.ap-dialog button,.ap-dialog select {font:inherit; padding:5px;}
+:root.ap-custom {--ButtonFace:var(--ap-surface)!important;--ButtonText:var(--ap-text)!important;--Menu:var(--ap-surface)!important;--MenuText:var(--ap-text)!important;--Hilight:var(--ap-accent)!important;--HilightText:var(--ap-accent-text)!important;--menu-background-color:var(--ap-surface)!important;--menu-text-color:var(--ap-text)!important;--menu-hover-color:var(--ap-accent)!important;--menu-active-color:var(--ap-accent)!important;--menu-text-active-color:var(--ap-accent-text)!important;--accent-color:var(--ap-accent)!important;}
+.ap-custom .jspaint,.ap-custom .menu-bar,.ap-custom .menu-popup,.ap-custom .menu-button,.ap-custom .menu-item {background-color:var(--ap-surface);color:var(--ap-text);font-family:var(--ap-font);font-size:var(--ap-size);}
+.ap-custom .menu-button:hover,.ap-custom .menu-button.active,.ap-custom .menu-item:hover,.ap-custom .menu-item.active {background:var(--ap-accent);color:var(--ap-accent-text);}
+.ap-custom .awesome-header {background:var(--ap-accent);color:var(--ap-accent-text);font-family:var(--ap-font);font-size:var(--ap-size);}
+.ap-custom .awesome-icon,.ap-custom .awesome-tool-button,.ap-custom .awesome-expanded-options .tool-options .awesome-size-control {background:var(--ap-surface);color:var(--ap-text);}
+.ap-custom .awesome-size-control output {color:var(--ap-text);}
+
+/* Scale the existing sprite as a whole, preserving its crop and theme. */
+:root[data-ap-icon-size="medium"] { --ap-tool-button:36px; --ap-tool-scale:1.5; --ap-tool-half:18px; }
+:root[data-ap-icon-size="large"] { --ap-tool-button:48px; --ap-tool-scale:2; --ap-tool-half:24px; }
+:root:is([data-ap-icon-size="medium"],[data-ap-icon-size="large"]) .tools-component {height:auto !important; min-height:0; flex-shrink:0;}
+:root:is([data-ap-icon-size="medium"],[data-ap-icon-size="large"]) .tools-component .tools {width:calc(2 * var(--ap-tool-button));height:auto;display:grid;grid-template-columns:repeat(2,var(--ap-tool-button));flex:none;}
+:root:is([data-ap-icon-size="medium"],[data-ap-icon-size="large"]) .tools-component .tool {width:var(--ap-tool-button);height:var(--ap-tool-button);margin:0;}
+:root:is([data-ap-icon-size="medium"],[data-ap-icon-size="large"]) .tool-icon {left:calc(50% - 8px) !important;top:calc(50% - 8px) !important;transform:scale(var(--ap-tool-scale));transform-origin:center;}
+:root:is([data-ap-icon-size="medium"],[data-ap-icon-size="large"]) .awesome-history .awesome-tool-button {width:var(--ap-tool-button);height:32px;font-size:26px;}
+
+/* Awesome Paint 2.9.1: adapt option panels to the actual toolbox width.
+   Scale brush previews only; drawing sizes and hit targets remain independent. */
+:root { --ap-option-scale:1; }
+:root[data-ap-icon-size="medium"] { --ap-option-scale:1.5; }
+:root[data-ap-icon-size="large"] { --ap-option-scale:2; }
+.tools-component.awesome-expanded-options .tool-options {
+  width:94%; max-width:none; align-self:center; box-sizing:border-box;
+}
+.tools-component.awesome-expanded-options .tool-options > div:not(.awesome-size-control),
+.tools-component.awesome-expanded-options .tool-options .awesome-size-control {
+  width:100%; max-width:none; box-sizing:border-box;
+}
+.tools-component.awesome-expanded-options .choose-brush {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:2px; min-height:0; padding:3px 1px; align-content:start;
+}
+.tools-component.awesome-expanded-options .choose-brush .chooser-option {
+  display:flex; align-items:center; justify-content:center; min-width:0;
+  min-height:calc(13px * var(--ap-option-scale));
+}
+.tools-component.awesome-expanded-options .choose-brush canvas {
+  width:calc(10px * var(--ap-option-scale)); height:calc(10px * var(--ap-option-scale));
+  max-width:100%; image-rendering:pixelated;
+}
+.awesome-expanded-options .awesome-emoji-options select {width:100%; max-width:100%;}
+.awesome-expanded-options .awesome-size-control input[type=range] {width:90%; max-width:none;}
+.awesome-expanded-options .awesome-size-control input[type=range]::-webkit-slider-runnable-track {width:65%;}
+.awesome-expanded-options .awesome-size-control input[type=range]::-webkit-slider-thumb {width:100%; height:14px;}
+.awesome-expanded-options .awesome-size-control input[type=range]::-moz-range-track {width:65%;}
+.awesome-expanded-options .awesome-size-control input[type=range]::-moz-range-thumb {width:90%; height:14px;}
+.awesome-expanded-options .awesome-size-label,.awesome-expanded-options .awesome-size-control output {font-size:calc(10px + (var(--ap-option-scale) - 1) * 2px); text-align:center;}
+
+/* Emoji picker: independent grid, responsive to viewport. */
+.ap-emoji-trigger {width:100%; min-height:28px; font-size:18px;}
+.ap-emoji-panel {box-sizing:border-box;width:min(390px,94vw);max-height:85vh;padding:12px;background:var(--ButtonFace,#eee);color:var(--ButtonText,#222);border:1px solid #888;border-radius:6px;font:14px Arial,sans-serif;}
+.ap-emoji-panel::backdrop {background:#0003;}
+.ap-emoji-heading {font-weight:bold;margin-bottom:8px;}
+.ap-emoji-panel select {width:100%;margin-bottom:8px;font:inherit;}
+.ap-emoji-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:3px;max-height:min(340px,55vh);overflow:auto;padding:3px;margin-bottom:8px;}
+.ap-emoji-grid button {min-width:0;height:42px;padding:0;font:24px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;background:var(--Window,#fff);color:var(--WindowText,#222);border:1px solid transparent;border-radius:4px;}
+.ap-emoji-grid button:hover,.ap-emoji-grid button:focus-visible {border-color:var(--Hilight,#2563eb);background:var(--ButtonFace,#ddd);}
+
+/* 2.9.4: larger emoji catalog, independent of stamp size. */
+.ap-emoji-panel {width:min(500px,94vw); max-height:90vh; padding:16px; font:16px Arial,sans-serif;}
+.ap-emoji-panel select {font:inherit; min-height:32px;}
+.ap-emoji-grid {grid-template-columns:repeat(auto-fill,minmax(48px,1fr)); gap:6px; max-height:min(340px,55vh); padding:4px;}
+.ap-emoji-panel .ap-emoji-grid button {box-sizing:border-box; height:48px; min-width:0; padding:0; font:32px/1.2 "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif !important; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+.ap-emoji-panel > button {font:inherit; padding:5px 12px;}
+
+/* 2.9.5: mirror controls below the emoji size slider. */
+.ap-emoji-flips {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;width:100%;margin-top:4px;}
+.ap-emoji-flips button {min-width:0;box-sizing:border-box;padding:2px;display:flex;align-items:center;justify-content:center;min-height:22px;}
+.ap-emoji-flips svg {width:100%;max-width:calc(18px * var(--ap-option-scale,1));height:auto;pointer-events:none;}
+.ap-emoji-flips button[aria-pressed="true"] {background:var(--Hilight,#2563eb);color:var(--HilightText,#fff);}
+
+/* Emoji rotation angle spans both transform columns. */
+.ap-emoji-angle {grid-column:1 / -1;text-align:center;font-size:inherit;}

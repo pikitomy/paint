@@ -1,0 +1,37 @@
+
+.color-box .rgb-picker-extension { display:flex; align-items:center; gap:5px; padding:2px 7px; white-space:nowrap; font:11px Arial,sans-serif; }
+.color-box .rgb-picker-extension label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+.color-box .rgb-picker-extension input[type=color] { width:35px; height:26px; padding:1px; cursor:pointer; }
+.color-box .rgb-picker-hex { font-family:monospace; font-size:11px; }
+.colors-component.tall .rgb-picker-extension { flex-wrap:wrap; }
+
+/* Awesome Paint 2.1: classic title and contextual tool options. */
+.awesome-header {flex:none; display:flex; align-items:center; min-height:28px; padding:3px 9px; box-sizing:border-box; background:linear-gradient(90deg,#174a8b,#3177b4); color:white; font:bold 13px Arial,sans-serif;}
+.awesome-title {white-space:nowrap;}
+.awesome-tool-button {box-sizing:border-box; width:24px; height:24px; padding:0; border:1px solid #777; background:#ddd; color:#111; font:bold 20px Arial,sans-serif; cursor:pointer;}
+.awesome-tool-button:active {background:#bbb;}
+/* Awesome Paint 2.3: keep original brush-tip grid at its native dimensions. */
+.awesome-expanded-options {height:auto; min-height:0;}
+.awesome-expanded-options .tool-options {width:41px; height:auto; min-height:66px; flex-direction:column; align-items:stretch; gap:5px; padding:0 0 6px; overflow:visible;}
+.awesome-expanded-options .tool-options > div:not(.awesome-size-control) {flex:none; width:41px; min-height:66px; box-sizing:border-box;}
+.awesome-expanded-options .tool-options .awesome-size-control {display:flex; flex:none; width:41px; height:153px; box-sizing:border-box; flex-direction:column; align-items:center; justify-content:space-between; gap:3px; padding:4px 2px; background:#d4d4d4; border:1px solid #888; font:10px Arial,sans-serif; color:#111;}
+.awesome-size-label {font-size:10px; line-height:12px;}
+.awesome-size-control input[type=range] {appearance:none; -webkit-appearance:none; writing-mode:vertical-lr; direction:rtl; width:18px; height:108px; margin:0; background:transparent; cursor:pointer;}
+.awesome-size-control input[type=range]::-webkit-slider-runnable-track {width:6px; background:#f8f8f8; border:1px solid #777; border-radius:4px;}
+.awesome-size-control input[type=range]::-webkit-slider-thumb {-webkit-appearance:none; width:16px; height:13px; border:1px solid #164878; border-radius:3px; background:#2c86d0; box-shadow:0 0 0 1px #fff;}
+.awesome-size-control input[type=range]::-moz-range-track {width:6px; background:#f8f8f8; border:1px solid #777; border-radius:4px;}
+.awesome-size-control input[type=range]::-moz-range-thumb {width:15px; height:12px; border:1px solid #164878; border-radius:3px; background:#2c86d0;}
+.awesome-size-control output {font:10px Arial,sans-serif; white-space:nowrap; color:#111;}
+.awesome-history {display:flex; align-items:center; gap:3px; padding:0 5px; flex:none;}
+.awesome-history .awesome-tool-button {width:26px; height:25px; border-radius:2px;}
+.awesome-icon {display:inline-flex; align-items:center; justify-content:center; min-width:27px; height:25px; border:1px solid #777; border-radius:2px; background:#eee; color:#111; font:bold 22px Arial,sans-serif; cursor:pointer; padding:0 4px;}
+.awesome-icon:active {background:#ccc;}
+.awesome-fullscreen {margin-left:auto; align-self:center; flex-shrink:0; font-size:20px;}
+
+/* Emoji tool: extra row and independent contextual options. */
+.tools-component .tools {height:auto; flex:none;}
+.tools-component {height:auto; min-height:0;}
+.tool-icon.awesome-emoji-icon {background-image:url('../help/awesome-emoji.svg') !important; background-position:center !important; background-size:contain !important; background-repeat:no-repeat !important;}
+.awesome-expanded-options .tool-options > .awesome-emoji-options {display:flex; flex-direction:column; gap:4px; align-items:center; width:41px;}
+.awesome-emoji-options select {width:41px; min-width:0; font:16px 'Segoe UI Emoji',sans-serif; padding:0;}
+.awesome-emoji-options option {font-size:20px;}
