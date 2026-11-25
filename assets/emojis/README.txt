@@ -1,0 +1,1 @@
+Microsoft Fluent Emoji 3D — https://github.com/microsoft/fluentui-emoji — MIT. Original PNG assets. Catalog includes available 3D variants only.
