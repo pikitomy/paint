@@ -1,14 +1,14 @@
 {
   "name": "Awesome Paint",
   "short_name": "Awesome Paint",
-  "description": "An MS Paint remake.",
+  "description": "Editor de dibujo y sellos gráficos. Edición Tomi.",
   "categories": [
     "photo",
     "utilities",
     "entertainment"
   ],
   "display": "standalone",
-  "start_url": ".",
+  "start_url": "./",
   "lang": "es",
   "theme_color": "#000080",
   "background_color": "#7b7b7b",
@@ -21,9 +21,18 @@
   ],
   "icons": [
     {
-      "src": "images/awesome-icon.png",
+      "src": "images/pwa-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
-  ]
+  ],
+  "id": "./",
+  "scope": "./"
 }
