@@ -478,12 +478,18 @@ const $H = $(E("div")).addClass("horizontal").appendTo($V);
 
 // Awesome Paint 2.1: title is positioned immediately above the original menu.
 const $awesome_header = $('<div class="awesome-header"><span class="awesome-title">🎨 Awesome Paint</span></div>');
-// Awesome Paint 2.2: vertical, contextual sliders for pencil and brush.
+// Awesome Paint 2.2: vertical, contextual sliders for pencil, brush and eraser.
 function awesome_size_slider(kind, label, max) {
   return $(`<div class="awesome-size-control awesome-${kind}-control" title="${label}"><span class="awesome-size-label">${label}</span><input type="range" min="1" max="${max}" step="1" aria-label="${label}" orient="vertical"><output></output></div>`);
 }
 const $awesome_pencil_control = awesome_size_slider('pencil', 'Lápiz', 50);
 const $awesome_brush_control = awesome_size_slider('brush', 'Brocha', 50);
+const $awesome_eraser_control = awesome_size_slider('eraser', 'Goma', 200);
+const $awesome_eraser_range = $awesome_eraser_control.find('input');
+$awesome_eraser_range.on('input change', function () {
+  eraser_size = Number(this.value);
+  $G.trigger('option-changed');
+});
 const $awesome_pencil_range = $awesome_pencil_control.find('input');
 const $awesome_brush_range = $awesome_brush_control.find('input');
 $awesome_pencil_range.on('input change', function () {
@@ -499,9 +505,10 @@ $awesome_brush_range.on('input change', function () {
 function update_awesome_tool_options() {
   const pencil = selected_tool.id === TOOL_PENCIL;
   const brush = selected_tool.id === TOOL_BRUSH;
+  const eraser = selected_tool.id === TOOL_ERASER;
   const $options = $toolbox.find('.tool-options');
   $options.children('.awesome-size-control').detach();
-  $toolbox.toggleClass('awesome-expanded-options', pencil || brush || selected_tool.id === 'TOOL_EMOJI');
+  $toolbox.toggleClass('awesome-expanded-options', pencil || brush || eraser || selected_tool.id === 'TOOL_EMOJI');
   if (pencil) {
     $awesome_pencil_range.val(pencil_size);
     $awesome_pencil_control.find('output').text(`${pencil_size} px`);
@@ -510,10 +517,17 @@ function update_awesome_tool_options() {
     $awesome_brush_range.val(brush_size);
     $awesome_brush_control.find('output').text(`${brush_size} px`);
     $options.append($awesome_brush_control);
+  } else if (eraser) {
+    $options.children().detach();
+    $awesome_eraser_range.val(eraser_size);
+    $awesome_eraser_control.find('output').text(`${eraser_size} px`);
+    $options.append($awesome_eraser_control);
   }
 }
 // Register only after $toolbox exists: $ToolBox triggers initial selection during construction.
 $G.on('option-changed', () => {
+  $awesome_eraser_range.val(eraser_size);
+  $awesome_eraser_control.find('output').text(`${eraser_size} px`);
   $awesome_pencil_range.val(pencil_size);
   $awesome_pencil_control.find('output').text(`${pencil_size} px`);
   $awesome_brush_range.val(brush_size);
@@ -1102,7 +1116,7 @@ $G.on("keydown", (e) => {
 			if (selected_tool.id === TOOL_BRUSH) {
 				brush_size = Math.max(1, Math.min(brush_size + delta, 500));
 			} else if (selected_tool.id === TOOL_ERASER) {
-				eraser_size = Math.max(1, Math.min(eraser_size + delta, 500));
+				eraser_size = Math.max(1, Math.min(eraser_size + delta, 200));
 			} else if (selected_tool.id === TOOL_AIRBRUSH) {
 				airbrush_size = Math.max(1, Math.min(airbrush_size + delta, 500));
 			} else if (selected_tool.id === TOOL_PENCIL) {
