@@ -217,10 +217,19 @@ const $ChooseShapeStyle = () => {
 			{ stroke: true, fill: false },
 			{ stroke: true, fill: true },
 			{ stroke: false, fill: true },
+			{ stroke: false, fill: true, pigment: true },
 		],
-		({ stroke, fill }, is_chosen, reuse_canvas) => {
+		({ stroke, fill, pigment }, is_chosen, reuse_canvas) => {
 			const ss_canvas = reuse_canvas(39, 21);
 			const ss_ctx = ss_canvas.ctx;
+            ss_canvas.title = pigment ? "Mezcla de pigmentos" : "";
+            ss_ctx.clearRect(0, 0, 39, 21);
+            if (pigment) {
+                ss_ctx.fillStyle = "#2459db"; ss_ctx.fillRect(5, 5, 19, 11);
+                ss_ctx.fillStyle = "#ffdf00"; ss_ctx.fillRect(15, 5, 19, 11);
+                ss_ctx.fillStyle = "#229b38"; ss_ctx.fillRect(15, 5, 9, 11);
+                return ss_canvas;
+            }
 
 			// border px inwards amount
 			let b = 5;
@@ -246,11 +255,12 @@ const $ChooseShapeStyle = () => {
 
 			return ss_canvas;
 		},
-		({ stroke, fill }) => {
+		({ stroke, fill, pigment }) => {
+            $chooser.pigment = !!pigment;
 			$chooser.stroke = stroke;
 			$chooser.fill = fill;
 		},
-		({ stroke, fill }) => $chooser.stroke === stroke && $chooser.fill === fill
+		({ stroke, fill, pigment }) => $chooser.stroke === stroke && $chooser.fill === fill && !!$chooser.pigment === !!pigment
 	).addClass("choose-shape-style");
 
 	$chooser.fill = false;

@@ -1,6 +1,7 @@
 // @ts-check
 /* global selection:writable, stroke_size:writable, textbox:writable */
 /* global $canvas, $canvas_area, $status_size, airbrush_size, brush_shape, brush_size, button, canvas_handles, ctrl, eraser_size, fill_color, pick_color_slot, get_language, localize, magnification, main_canvas, main_ctx, pencil_size, pointer, pointer_active, pointer_over_canvas, pointer_previous, pointer_start, return_to_magnification, selected_colors, shift, stroke_color, transparency */
+import { mixShapeOverlay } from "./awesome-pigments.js";
 import { createGuideTool } from "./awesome-guides.js";
 import { createEmojiTool } from "./awesome-emoji.js";
 import { OnCanvasSelection } from "./OnCanvasSelection.js";
@@ -1079,7 +1080,18 @@ const tools = [{
 		this.points[i].y = y;
 
 		this.preview_canvas.ctx.clearRect(0, 0, this.preview_canvas.width, this.preview_canvas.height);
-		if (this.$options.fill && !this.$options.stroke) {
+        if (this.$options.pigment) {
+            const c = this.preview_canvas.ctx;
+            c.globalCompositeOperation = "source-over";
+            c.fillStyle = fill_color;
+            if (this.points.length >= 3) {
+                draw_polygon(c, this.points, false, true);
+                mixShapeOverlay(main_ctx, this.preview_canvas);
+            } else {
+                c.strokeStyle = fill_color;
+                draw_line_strip(c, this.points);
+            }
+        } else if (this.$options.fill && !this.$options.stroke) {
 			this.preview_canvas.ctx.drawImage(main_canvas, 0, 0);
 			this.preview_canvas.ctx.strokeStyle = "white";
 			this.preview_canvas.ctx.globalCompositeOperation = "difference";
@@ -1122,6 +1134,14 @@ const tools = [{
 				name: localize("Polygon"),
 				icon: get_icon_for_tool(this),
 			}, () => {
+                if (this.$options.pigment) {
+                    const overlay = make_canvas(main_canvas.width, main_canvas.height);
+                    overlay.ctx.fillStyle = fill_color;
+                    draw_polygon(overlay.ctx, this.points, false, true);
+                    mixShapeOverlay(ctx, overlay);
+                    ctx.drawImage(overlay, 0, 0);
+                    return;
+                }
 				ctx.fillStyle = fill_color;
 				ctx.strokeStyle = stroke_color;
 
@@ -1356,7 +1376,11 @@ tools.forEach((tool) => {
 			tool.shape_canvas.ctx.strokeStyle = main_ctx.strokeStyle;
 			tool.shape_canvas.ctx.lineWidth = main_ctx.lineWidth;
 			tool.shape(tool.shape_canvas.ctx, pointer_start.x, pointer_start.y, pointer.x - pointer_start.x, pointer.y - pointer_start.y);
-			const signed_width = pointer.x - pointer_start.x || 1;
+			if (tool.$options.pigment) {
+                const x = Math.min(pointer.x, pointer_start.x), y = Math.min(pointer.y, pointer_start.y);
+                mixShapeOverlay(main_ctx, tool.shape_canvas, x-2, y-2, Math.abs(pointer.x-pointer_start.x)+4, Math.abs(pointer.y-pointer_start.y)+4);
+            }
+            const signed_width = pointer.x - pointer_start.x || 1;
 			const signed_height = pointer.y - pointer_start.y || 1;
 			$status_size.text(`${signed_width}x${signed_height}`);
 		};
