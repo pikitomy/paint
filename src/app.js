@@ -3,6 +3,7 @@
 /* global airbrush_size:writable, brush_shape:writable, brush_size:writable, button:writable, ctrl:writable, eraser_size:writable, fill_color:writable, pick_color_slot:writable, history_node_to_cancel_to:writable, MenuBar:writable, my_canvas_height:writable, my_canvas_width:writable, palette:writable, pencil_size:writable, pointer:writable, pointer_active:writable, pointer_buttons:writable, pointer_over_canvas:writable, pointer_previous:writable, pointer_start:writable, pointer_type:writable, pointers:writable, reverse:writable, shift:writable, stroke_color:writable, stroke_size:writable, update_helper_layer_on_pointermove_active:writable */
 /* global AccessKeys, current_history_node, default_airbrush_size, default_brush_shape, default_brush_size, default_canvas_height, default_canvas_width, default_eraser_size, default_magnification, default_pencil_size, default_stroke_size, enable_fs_access_api, file_name, get_direction, localize, magnification, main_canvas, main_ctx, return_to_tools, selected_colors, selected_tool, selected_tools, selection, systemHooks, textbox, transparency */
 
+import { toggleGuides } from "./awesome-guides.js";
 import { $ColorBox } from "./$ColorBox.js";
 import { $ToolBox } from "./$ToolBox.js";
 import { Handles } from "./Handles.js";
@@ -508,7 +509,7 @@ function update_awesome_tool_options() {
   const eraser = selected_tool.id === TOOL_ERASER;
   const $options = $toolbox.find('.tool-options');
   $options.children('.awesome-size-control').detach();
-  $toolbox.toggleClass('awesome-expanded-options', pencil || brush || eraser || selected_tool.id === 'TOOL_EMOJI');
+  $toolbox.toggleClass('awesome-expanded-options', pencil || brush || eraser || (selected_tool.id === 'TOOL_EMOJI' || selected_tool.id === 'TOOL_GUIDES'));
   if (pencil) {
     $awesome_pencil_range.val(pencil_size);
     $awesome_pencil_control.find('output').text(`${pencil_size} px`);
@@ -585,6 +586,7 @@ window.$status_position = $status_position;
 const $status_size = $(E("div")).addClass("status-coordinates status-field inset-shallow").appendTo($status_area);
 window.$status_size = $status_size;
 
+$('<button type="button" class="awesome-icon" title="Mostrar u ocultar guías" aria-label="Mostrar u ocultar guías">◉</button>').appendTo($status_area).on('click',toggleGuides);
 // Fullscreen button at the far right of the status bar.
 const $awesome_fullscreen = $('<button type="button" class="awesome-icon awesome-fullscreen" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>').appendTo($status_area);
 const update_awesome_fullscreen = () => {

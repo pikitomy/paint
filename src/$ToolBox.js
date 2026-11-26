@@ -56,6 +56,7 @@ function $ToolBox(tools, is_extras) {
 			});
 			$icon.toggleClass("use-svg", use_svg);
 			if (tool.id === "TOOL_EMOJI") $icon.addClass("awesome-emoji-icon");
+			if (tool.id === "TOOL_GUIDES") $icon.css({backgroundImage:"none"}).html('<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M1 6H23" stroke="#e34b4b"/><path d="M12 6L1 23M12 6L8 23M12 6L16 23M12 6L23 23" stroke="#3989d5"/><circle cx="12" cy="6" r="2" fill="#e34b4b"/></svg>');
 		};
 		update_css();
 		$G.on("theme-load resize", update_css);
