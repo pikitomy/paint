@@ -3,7 +3,6 @@
 /* global $thumbnail_window:writable, canvas_bounding_client_rect:writable, current_history_node:writable, file_format:writable, file_name:writable, helper_layer:writable, history_node_to_cancel_to:writable, magnification:writable, monochrome:writable, palette:writable, pointer:writable, return_to_magnification:writable, return_to_tools:writable, root_history_node:writable, saved:writable, selected_colors:writable, selected_tool:writable, selected_tools:writable, selection:writable, show_grid:writable, show_thumbnail:writable, system_file_handle:writable, textbox:writable, thumbnail_canvas:writable, tool_transparent_mode:writable, transparency:writable, undos:writable */
 /* global $canvas, $canvas_area, $colorbox, $status_text, $toolbox, $Window, AccessKeys, applyCSSProperties, decodeBMP, default_canvas_height, default_canvas_width, default_magnification, default_tool, enable_palette_loading_from_indexed_images, encodeBMP, localize, main_canvas, main_ctx, monochrome_palette, my_canvas_height, my_canvas_width, new_local_session, parseThemeFileString, pointer_active, pointers, polychrome_palette, redos, systemHooks, text_tool_font, update_fill_and_stroke_colors_and_lineWidth, UPNG, UTIF */
 
-import { drawGuides, clearGuides } from "./awesome-guides.js";
 import { $DialogWindow } from "./$ToolWindow.js";
 import { OnCanvasHelperLayer } from "./OnCanvasHelperLayer.js";
 import { OnCanvasSelection } from "./OnCanvasSelection.js";
@@ -290,8 +289,6 @@ function render_canvas_view(hcanvas, scale, viewport_x, viewport_y, is_helper_la
 		// (For the main canvas view, the helper layer is separate from (and overlaid on top of) the document canvas)
 		hctx.drawImage(main_canvas, viewport_x, viewport_y, hcanvas.width, hcanvas.height, 0, 0, hcanvas.width, hcanvas.height);
 	}
-
-	if (is_helper_layer) drawGuides(hctx, scale, viewport_x, viewport_y, main_canvas.width, main_canvas.height);
 
 	var tools_to_preview = [...selected_tools];
 
@@ -654,7 +651,6 @@ function reset_file() {
 }
 
 function reset_canvas_and_history() {
-	clearGuides();
 	undos.length = 0;
 	redos.length = 0;
 	current_history_node = root_history_node = make_history_node({
@@ -999,6 +995,7 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 			system_file_handle = info.source_file_handle;
 		}
 		saved = true;
+		if (!from_session_load) window.awesomeClearRecovery?.();
 		update_title();
 
 		callback?.();
@@ -1206,6 +1203,7 @@ function file_save(maybe_saved_callback = () => { }, update_from_saved = true) {
 		// So only mark the file as saved if it's definite.
 		if (success === true) {
 			saved = true;
+	window.awesomeClearRecovery?.();
 			update_title();
 		}
 		// However, we can still apply format-specific color reduction to the canvas,
@@ -1236,6 +1234,7 @@ function file_save_as(maybe_saved_callback = () => { }, update_from_saved = true
 		},
 		savedCallbackUnreliable: ({ newFileName, newFileFormatID, newFileHandle, newBlob }) => {
 			saved = true;
+	window.awesomeClearRecovery?.();
 			system_file_handle = newFileHandle;
 			file_name = newFileName;
 			file_format = newFileFormatID;

@@ -1,3 +1,4 @@
+import { pattern, textureActive } from "./awesome-patterns.js";
 // @ts-check
 /* global selection:writable, stroke_size:writable, textbox:writable */
 /* global $canvas, $canvas_area, $status_size, airbrush_size, brush_shape, brush_size, button, canvas_handles, ctrl, eraser_size, fill_color, pick_color_slot, get_language, localize, magnification, main_canvas, main_ctx, pencil_size, pointer, pointer_active, pointer_over_canvas, pointer_previous, pointer_start, return_to_magnification, selected_colors, shift, stroke_color, transparency */
@@ -551,7 +552,7 @@ const tools = [{
 				icon: get_icon_for_tool(this),
 			}, () => {
 				// Perform global color replacement
-				draw_noncontiguous_fill(ctx, x, y, fill_color);
+				draw_noncontiguous_fill(ctx, x, y, textureActive ? pattern(ctx,selected_colors) : fill_color);
 			});
 		} else {
 			undoable({
@@ -559,7 +560,7 @@ const tools = [{
 				icon: get_icon_for_tool(this),
 			}, () => {
 				// Perform a normal fill operation
-				draw_fill(ctx, x, y, fill_color);
+				draw_fill(ctx, x, y, textureActive ? pattern(ctx,selected_colors) : fill_color);
 			});
 		}
 	},
@@ -1080,7 +1081,12 @@ const tools = [{
 		this.points[i].y = y;
 
 		this.preview_canvas.ctx.clearRect(0, 0, this.preview_canvas.width, this.preview_canvas.height);
-        if (this.$options.pigment) {
+        if (textureActive && this.$options.fill && !this.$options.pigment) {
+            const c=this.preview_canvas.ctx; c.globalCompositeOperation="source-over";
+            c.fillStyle=pattern(c,selected_colors); c.strokeStyle=stroke_color;
+            if(this.points.length>=3)draw_polygon(c,this.points,this.$options.stroke,true);
+            else {c.strokeStyle=fill_color;draw_line_strip(c,this.points);}
+        } else if (this.$options.pigment) {
             const c = this.preview_canvas.ctx;
             c.globalCompositeOperation = "source-over";
             c.fillStyle = fill_color;
@@ -1134,6 +1140,7 @@ const tools = [{
 				name: localize("Polygon"),
 				icon: get_icon_for_tool(this),
 			}, () => {
+                if(textureActive && this.$options.fill && !this.$options.pigment){ctx.fillStyle=pattern(ctx,selected_colors);ctx.strokeStyle=stroke_color;draw_polygon(ctx,this.points,this.$options.stroke,true);return;}
                 if (this.$options.pigment) {
                     const overlay = make_canvas(main_canvas.width, main_canvas.height);
                     overlay.ctx.fillStyle = fill_color;
@@ -1375,6 +1382,7 @@ tools.forEach((tool) => {
 			tool.shape_canvas.ctx.fillStyle = main_ctx.fillStyle;
 			tool.shape_canvas.ctx.strokeStyle = main_ctx.strokeStyle;
 			tool.shape_canvas.ctx.lineWidth = main_ctx.lineWidth;
+            if(textureActive && tool.$options.fill && !tool.$options.pigment){tool.shape_canvas.ctx.fillStyle=pattern(tool.shape_canvas.ctx,selected_colors);if(!tool.$options.stroke)tool.shape_canvas.ctx.strokeStyle=tool.shape_canvas.ctx.fillStyle;}
 			tool.shape(tool.shape_canvas.ctx, pointer_start.x, pointer_start.y, pointer.x - pointer_start.x, pointer.y - pointer_start.y);
 			if (tool.$options.pigment) {
                 const x = Math.min(pointer.x, pointer_start.x), y = Math.min(pointer.y, pointer_start.y);

@@ -10,7 +10,7 @@ import { are_you_sure, change_url_param, choose_file_to_paste, clear, delete_sel
 import { show_help } from "./help.js";
 import { $G, get_rgba_from_color, is_discord_embed } from "./helpers.js";
 import { show_imgur_uploader } from "./imgur.js";
-import { manage_storage } from "./manage-storage.js";
+
 import { showMessageBox } from "./msgbox.js";
 import { simulateRandomGesturesPeriodically, simulatingGestures, stopSimulatingGestures } from "./simulate-random-gestures.js";
 import { speech_recognition_active, speech_recognition_available } from "./speech-recognition.js";
@@ -136,16 +136,6 @@ const menus = {
 			description: localize("Uploads the active document to Imgur"),
 		},
 		MENU_DIVIDER,
-		{
-			label: localize("Manage Storage"),
-			speech_recognition: [
-				"manage storage", "show storage", "open storage window", "manage sessions", "show sessions", "show local sessions", "local sessions", "storage manager", "show storage manager", "open storage manager",
-				"show autosaves", "show saves", "show saved documents", "show saved files", "show saved pictures", "show saved images", "show local storage",
-				"autosaves", "autosave", "saved documents", "saved files", "saved pictures", "saved images", "local storage",
-			],
-			action: () => { manage_storage(); },
-			description: localize("Manages storage of previously created or opened pictures."),
-		},
 		MENU_DIVIDER,
 		{
 			label: localize("Print Pre&view"),
@@ -229,7 +219,8 @@ const menus = {
 				"exit application", "exit paint", "close paint window",
 			],
 			action: () => {
-				are_you_sure(() => {
+				are_you_sure(async () => {
+					await window.awesomeClearRecovery?.();
 					if (is_discord_embed) {
 						// For the Discord Activity, there doesn't seem to be an API to exit the activity.
 						showMessageBox({
@@ -1350,15 +1341,6 @@ const menus = {
 			description: "Controla la aplicación mediante comandos de voz.",
 		},
 		MENU_DIVIDER,
-		{
-			emoji_icon: "🗃️",
-			label: "Administrar almacenamiento",
-			speech_recognition: [
-				// This is a duplicate menu item (for easy access), so it doesn't need speech recognition data here.
-			],
-			action: () => { manage_storage(); },
-			description: "Administra el almacenamiento de imágenes creadas o abiertas.",
-		},
 		MENU_DIVIDER,
 		{
 			emoji_icon: "📢",

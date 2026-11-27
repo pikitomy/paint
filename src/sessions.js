@@ -109,66 +109,87 @@ function handle_data_loss() {
 	return save_paused;
 }
 
-class LocalSession {
-	constructor(session_id) {
-		this.id = session_id;
-		const ls_key = `image#${session_id}`;
-		log(`Local storage key: ${ls_key}`);
-		// save image to storage
-		this.save_image_to_storage_immediately = () => {
-			const save_paused = handle_data_loss();
-			if (save_paused) {
-				return;
-			}
-			log(`Saving image to storage: ${ls_key}`);
-			localStore.set(ls_key, main_canvas.toDataURL("image/png"), (err) => {
-				if (err) {
-					// @ts-ignore (quotaExceeded is added by storage.js)
-					if (err.quotaExceeded) {
-						storage_quota_exceeded();
-					} else {
-						// e.g. localStorage is disabled
-						// (or there's some other error?)
-						// @TODO: show warning with "Don't tell me again" type option
-					}
-				}
-			});
-		};
-		this.save_image_to_storage_soon = debounce(this.save_image_to_storage_immediately, 100);
-		localStore.get(ls_key, (err, uri) => {
-			if (err) {
-				if (localStorageAvailable) {
-					show_error_message("Failed to retrieve image from local storage.", err);
-				} else {
-					// @TODO: DRY with storage manager message
-					showMessageBox({
-						message: "Please enable local storage in your browser's settings for local backup. It may be called Cookies, Storage, or Site Data.",
-					});
-				}
-			} else if (uri) {
-				load_image_from_uri(uri).then((info) => {
-					open_from_image_info(info, null, null, true, true);
-				}, (error) => {
-					show_error_message("Failed to open image from local storage.", error);
-				});
-			} else {
-				// no uri so lets save the blank canvas
-				this.save_image_to_storage_soon();
-			}
-		});
-		$G.on("session-update.session-hook", () => {
-			this.save_image_to_storage_soon();
-		});
-	}
-	end() {
-		// Skip debounce and save immediately
-		this.save_image_to_storage_soon.cancel();
-		this.save_image_to_storage_immediately();
-		// Remove session-related hooks
-		$G.off(".session-hook");
-	}
+// One emergency snapshot per origin. Never store drawings in localStorage.
+const recoveryDB = new Promise((resolve, reject) => {
+ const request = indexedDB.open("awesome-paint-recovery", 1);
+ request.onupgradeneeded = () => request.result.createObjectStore("draft");
+ request.onsuccess = () => resolve(request.result);
+ request.onerror = () => reject(request.error);
+});
+recoveryDB.catch(console.warn);
+let revision = 0, warned = false, firstLocal = true;
+let pending = Promise.resolve();
+function recoveryOperation(mode, action) {
+ return recoveryDB.then(db => new Promise((resolve, reject) => {
+  const tx = db.transaction("draft", mode);
+  const req = action(tx.objectStore("draft"));
+  tx.oncomplete = () => resolve(req.result);
+  tx.onabort = tx.onerror = () => reject(tx.error);
+ }));
 }
-
+function enqueue(action) {
+ const result = pending.then(action);
+ pending = result.catch(error => {
+  console.warn("Recuperación de emergencia:", error);
+  if (!warned) { warned = true; showMessageBox({title:"Recuperación", message:"No se pudo actualizar la copia de emergencia. Guardá el dibujo en disco."}); }
+ });
+ return result;
+}
+function clearRecovery() {
+ revision++;
+ return enqueue(() => recoveryOperation("readwrite", store => store.delete("latest"))).catch(() => {});
+}
+window.awesomeClearRecovery = clearRecovery;
+function snapshot() {
+ if (saved) return;
+ const token = ++revision;
+ main_canvas.toBlob(blob => {
+  if (!blob || token !== revision || saved) return;
+  enqueue(() => token === revision ? recoveryOperation("readwrite", store => store.put(blob, "latest")) : undefined).catch(() => {});
+ }, "image/png");
+}
+class LocalSession {
+ constructor(session_id) {
+  this.id = session_id;
+  this.saveSoon = debounce(snapshot, 350);
+  $G.on("session-update.session-hook", () => this.saveSoon());
+  if (firstLocal) {
+   firstLocal = false;
+   this.restore();
+  }
+ }
+ async restore() {
+  try {
+   const blob = await recoveryOperation("readonly", store => store.get("latest"));
+   if (blob && saved) {
+    const result = await showMessageBox({title:"Recuperación de dibujo", message:"Hay una copia de emergencia del último dibujo. ¿Deseás recuperarla?", buttons:[{label:"Recuperar dibujo",value:"restore",default:true},{label:"Descartar",value:"discard"}]});
+    if (result === "restore" && saved) {
+     const url = URL.createObjectURL(blob);
+     try {
+      const info = await load_image_from_uri(url);
+      open_from_image_info(info, () => { saved = false; update_title(); snapshot(); }, null, true, true);
+     } finally { URL.revokeObjectURL(url); }
+    } else if (result === "discard") await clearRecovery();
+   }
+   const keys = Object.keys(localStorage).filter(key => key.startsWith("image#"));
+   if (keys.length && await showMessageBox({title:"Copias antiguas",message:`Hay ${keys.length} copias antiguas de JS Paint. ¿Eliminar estas copias locales? Los archivos guardados en disco no se modifican.`,buttons:[{label:"Eliminar",value:"yes"},{label:"Conservar",value:"no",default:true}]}) === "yes") {
+    keys.forEach(key => localStorage.removeItem(key));
+   }
+  } catch(error) { console.warn("Recuperación:",error); }
+ }
+ end() {
+  this.saveSoon.cancel();
+  $G.off(".session-hook");
+  clearRecovery();
+ }
+}
+// Browser close/reload is ambiguous: retain dirty drafts rather than lose work.
+window.addEventListener("beforeunload", event => {
+ if (!saved) { snapshot(); event.preventDefault(); event.returnValue = ""; }
+});
+document.addEventListener("visibilitychange", () => {
+ if (document.visibilityState === "hidden") snapshot();
+});
 
 // The user ID is not persistent
 // A person can enter a session multiple times,

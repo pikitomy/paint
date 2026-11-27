@@ -1,3 +1,4 @@
+import { pattern, openPatterns, textureActive, setTextureActive } from "./awesome-patterns.js";
 // @ts-check
 /* global $bottom, $left, $right, button, get_direction, localize, palette, selected_colors */
 import { $Component } from "./$Component.js";
@@ -73,8 +74,18 @@ function $ColorBox(vertical) {
 	$rgb_label.append($rgb_input);
 	$rgb_picker.append($rgb_label, $rgb_hex);
 	$cb.append($rgb_picker);
+	// Shared texture selector, beside RGB.
+	const $texture = $(E("button")).attr({type:"button",title:"Elegir textura de relleno", "aria-pressed":"false"}).addClass("ap-texture-button");
+	const sample = document.createElement("canvas"); sample.width=24; sample.height=16;
+	$texture.append(sample, " Textura").appendTo($cb);
+	function refreshTexture(){const c=sample.getContext("2d");c.clearRect(0,0,24,16);c.fillStyle=pattern(c,selected_colors);c.fillRect(0,0,24,16);$texture.attr("aria-pressed",String(textureActive));}
+	$texture.on("click",()=>openPatterns(()=>setTextureActive(true)));
+	document.addEventListener("ap-texture-change",refreshTexture);
+	$G.on("option-changed",refreshTexture);
+	refreshTexture();
 	let rgb_target = "foreground";
 	$rgb_input.on("input change", () => {
+		setTextureActive(false);
 		selected_colors[rgb_target] = $rgb_input.val();
 		$rgb_hex.text(String($rgb_input.val()).toUpperCase());
 		$G.trigger("option-changed");
@@ -124,6 +135,7 @@ function $ColorBox(vertical) {
 
 			const color_selection_slot = e.ctrlKey ? "ternary" : e.button === 0 ? "foreground" : e.button === 2 ? "background" : null;
 			if (color_selection_slot) {
+				setTextureActive(false);
 				if (within_double_click_period && e.button === double_click_button) {
 					show_edit_colors_window($b, color_selection_slot);
 				} else {
